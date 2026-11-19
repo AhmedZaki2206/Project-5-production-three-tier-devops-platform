@@ -19,7 +19,7 @@ Executed locally on 18 November 2026 using Windows 11, Docker Desktop Linux Engi
 | Ansible lint | PASSED | ansible-lint 26.11.0: 0 failures, 0 warnings. |
 | Trivy image scan | PASSED | Trivy 0.67.2, HIGH/CRITICAL, `--ignore-unfixed`: 0 findings after remediation. Initial scan found four fixed HIGH findings in zlib and Starlette. |
 | Disposable Ubuntu VM deployment and idempotency | NOT RUN | No disposable VM was supplied. |
-| GitHub Actions jobs | NOT RUN | Requires a PR on GitHub. |
+| GitHub Actions jobs | PASSED | PR #1 run `44498151281` on commit `37a2511`: `validate` and `ansible` both succeeded. Initial run failed at job setup because Trivy Action tag lacked the `v` prefix; fixed in commit `37a2511`. |
 | GHCR publication | NOT RUN | Runs only after a future approved merge to `main`. |
 
 Trivy is a vulnerability database snapshot; findings may change. No cloud deployment is part of this project.
