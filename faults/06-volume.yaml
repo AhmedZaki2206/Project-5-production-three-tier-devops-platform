@@ -1,0 +1,4 @@
+services:
+  db:
+    volumes:
+      - ./faults/read-only-data:/var/lib/postgresql/data:ro

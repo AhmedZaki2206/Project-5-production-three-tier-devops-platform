@@ -1,0 +1,7 @@
+services:
+  app:
+    networks: [frontend]
+    healthcheck: {disable: true}
+  proxy:
+    depends_on:
+      app: {condition: service_started}

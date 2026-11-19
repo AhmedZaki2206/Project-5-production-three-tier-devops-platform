@@ -1,0 +1,8 @@
+services:
+  app:
+    command: [sh, -c, "echo intentional crash; exit 42"]
+    restart: on-failure
+    healthcheck: {disable: true}
+  proxy:
+    depends_on:
+      app: {condition: service_started}

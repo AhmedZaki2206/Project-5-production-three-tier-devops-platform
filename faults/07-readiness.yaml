@@ -1,0 +1,8 @@
+services:
+  app:
+    environment:
+      DATABASE_URL: postgresql+psycopg://portal_app:change-me-for-local-use@db:5999/infrastructure_portal
+    healthcheck: {disable: true}
+  proxy:
+    depends_on:
+      app: {condition: service_started}
