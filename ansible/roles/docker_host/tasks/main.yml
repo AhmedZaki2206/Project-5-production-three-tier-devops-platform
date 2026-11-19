@@ -1,0 +1,69 @@
+---
+- name: Install Docker Engine and Compose plugin from Ubuntu repositories
+  ansible.builtin.apt:
+    name:
+      - docker.io
+      - docker-compose-v2
+    state: present
+    update_cache: true
+
+- name: Enable and start Docker
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Create application directory
+  ansible.builtin.file:
+    path: "{{ docker_host_app_directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Copy project files to disposable server
+  ansible.builtin.copy:
+    src: "{{ docker_host_project_source }}/{{ item }}"
+    dest: "{{ docker_host_app_directory }}/{{ item }}"
+    owner: root
+    group: root
+    mode: preserve
+  loop:
+    - Dockerfile
+    - requirements.txt
+    - alembic.ini
+    - docker-compose.yml
+    - .dockerignore
+    - app/
+    - migrations/
+    - nginx/
+  notify: Rebuild application stack
+
+- name: Render local environment file
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ docker_host_app_directory }}/.env"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+  notify: Rebuild application stack
+
+- name: Apply configuration-change handlers before health verification
+  ansible.builtin.meta: flush_handlers
+
+- name: Start application stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ docker_host_app_directory }}"
+    state: present
+    build: policy
+
+- name: Verify local application readiness
+  ansible.builtin.uri:
+    url: http://127.0.0.1:8080/health/ready
+    status_code: 200
+    return_content: true
+  register: docker_host_health
+  retries: 15
+  delay: 2
+  until: docker_host_health.status == 200

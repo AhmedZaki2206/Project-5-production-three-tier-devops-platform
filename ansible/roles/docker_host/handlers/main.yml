@@ -1,0 +1,6 @@
+---
+- name: Rebuild application stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ docker_host_app_directory }}"
+    state: present
+    build: always

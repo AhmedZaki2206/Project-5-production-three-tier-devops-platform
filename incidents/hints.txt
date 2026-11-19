@@ -1,0 +1,10 @@
+01|Read the Nginx error log and compare the configured upstream port with app:8000.
+02|Inspect restart count, exit code, and the previous application logs.
+03|Prove whether DNS works before checking TCP 5432 and the db container state.
+04|Compare DATABASE_URL with the database user without printing secrets in shared logs.
+05|Inspect the networks attached to app and db using docker inspect.
+06|Inspect the exact mount type, source, permissions, and PostgreSQL startup logs.
+07|Compare liveness with readiness and test SELECT 1 from the application path.
+08|Run the failing pytest test locally and read the assertion diff.
+09|Inspect the requested image tag and registry response before changing Compose.
+10|Validate gzip integrity and SQL contents before any destructive restore.

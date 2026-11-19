@@ -1,0 +1,10 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+backups/*.sql.gz
+.deployment/
+.lab-state/
+ansible/group_vars/all/vault.yml

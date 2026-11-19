@@ -1,0 +1,74 @@
+name: Pull request validation
+on:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      APP_IMAGE: portal-ci:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Lint Python
+        run: ruff check .
+      - name: Run pytest
+        run: pytest
+      - name: Validate Compose
+        run: docker compose config --quiet
+      - name: Validate Bash
+        run: bash -n scripts/*.sh lab.sh
+      - name: ShellCheck
+        run: shellcheck scripts/*.sh lab.sh
+      - name: Build application image
+        run: docker build --tag portal-ci:${{ github.sha }} .
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: portal-ci:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+      - name: Compose integration smoke test
+        run: |
+          docker compose up -d --wait
+          ./scripts/smoke-test.sh
+          ./scripts/db-verify.sh
+      - name: Collect failure diagnostics
+        if: failure()
+        run: docker compose ps && docker compose logs --tail=100
+      - name: Cleanup project resources
+        if: always()
+        run: docker compose down --volumes --remove-orphans
+
+  ansible:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-ansible.txt
+      - name: Install pinned Ansible validation tools
+        run: pip install -r requirements-ansible.txt
+      - name: Install required collection
+        run: ansible-galaxy collection install -r ansible/requirements.yml
+      - name: Validate playbook syntax
+        working-directory: ansible
+        run: ansible-playbook site.yml --syntax-check
+      - name: Lint Ansible content
+        run: ansible-lint ansible

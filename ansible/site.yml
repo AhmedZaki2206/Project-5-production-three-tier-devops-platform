@@ -1,0 +1,6 @@
+---
+- name: Configure disposable three-tier lab server
+  hosts: all
+  become: true
+  roles:
+    - docker_host

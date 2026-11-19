@@ -1,0 +1,10 @@
+01	Nginx 502 Bad Gateway
+02	FastAPI container keeps restarting
+03	PostgreSQL is unavailable
+04	Incorrect database credentials
+05	Docker network isolation problem
+06	Persistent volume / data issue
+07	Application readiness check fails
+08	CI pipeline fails due to broken tests
+09	Wrong image tag deployed
+10	Restore a failed database backup
